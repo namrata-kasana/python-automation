@@ -1,0 +1,16 @@
+import subprocess
+
+def run_python_script(script_path):
+    python_path = r"C:\Python39\python.exe"  # Full path to your Python interpreter
+    try:
+        result = subprocess.run([python_path, script_path], check=True, text=True, capture_output=True)
+        print("Script Output:\n", result.stdout)
+        if result.stderr:
+            print("Script Error Output:\n", result.stderr)
+    except subprocess.CalledProcessError as e:
+        print(f"Error while running the script: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+# Example usage:
+run_python_script('your_script.py')
