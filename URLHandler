@@ -1,0 +1,43 @@
+import requests
+
+class URLHandler:
+    def __init__(self, url):
+        self.url = url
+
+    def fetch_url_content(self):
+        try:
+            # Fetch the content of the URL
+            response = requests.get(self.url)
+            response.raise_for_status()  # Will raise an HTTPError for bad responses (4xx or 5xx)
+            content = response.text
+            return content.splitlines()  # Split content by lines
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching URL: {e}")
+        return []
+
+    def search_and_filter(self, search_term):
+        # Fetch the content from the URL
+        lines = self.fetch_url_content()
+
+        # Filter lines containing the search term (case-insensitive search)
+        if lines:
+            filtered_lines = [line for line in lines if search_term.lower() in line.lower()]
+            return filtered_lines
+        return []
+
+    def display_filtered_lines(self, search_term):
+        filtered_lines = self.search_and_filter(search_term)
+        if filtered_lines:
+            print(f"Lines containing '{search_term}':")
+            for line in filtered_lines:
+                print(line.strip())  # .strip() to remove any extra newlines
+        else:
+            print(f"No lines found containing '{search_term}'.")
+
+# Example of using the class with URL and search term
+if __name__ == "__main__":
+    url = "https://example.com"  # Replace with the actual URL
+    search_term = "error"  # Replace with the search term you want
+
+    url_handler = URLHandler(url)
+    url_handler.display_filtered_lines(search_term)
