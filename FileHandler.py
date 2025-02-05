@@ -1,11 +1,11 @@
+import argparse
+
 class FileHandler:
     def __init__(self, file_path):
-        # Store the file path in an instance variable
         self.file_path = file_path
 
     def read_file(self):
         try:
-            # Open the file in read mode and print its contents
             with open(self.file_path, 'r') as file:
                 content = file.read()
                 print("File Content:")
@@ -16,9 +16,20 @@ class FileHandler:
             print(f"Error: {str(e)}")
 
 
-# Example of passing the file path via constructor
-file_path = "example.txt"  # Replace with your actual file path
-file_handler = FileHandler(file_path)
+# Setting up the command line argument parser
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Process a file path.")
+    parser.add_argument("file_path", type=str, help="Path to the file you want to read")
+    return parser.parse_args()
 
-# Calling the method to read the file
-file_handler.read_file()
+
+# Main script
+if __name__ == "__main__":
+    # Parse arguments from the command line
+    args = parse_arguments()
+
+    # Create a FileHandler object with the file path from the command line argument
+    file_handler = FileHandler(args.file_path)
+
+    # Call the read_file method
+    file_handler.read_file()
