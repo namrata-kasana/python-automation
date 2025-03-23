@@ -1,0 +1,82 @@
+import requests
+import xml.etree.ElementTree as ET
+
+def fetch_xml(api_endpoint):
+    """
+    Fetches XML data from the given API endpoint.
+    """
+    try:
+        response = requests.get(api_endpoint)
+        response.raise_for_status()  # Raise an error on bad status
+        return response.text
+    except requests.RequestException as e:
+        print("Error fetching XML:", e)
+        return None
+
+def search_keyword_in_element(element, keyword):
+    """
+    Recursively searches for the keyword in the text of an element or any of its children.
+    Returns True if the keyword is found; otherwise, returns False.
+    """
+    if element.text and keyword.lower() in element.text.lower():
+        return True
+    for child in element:
+        if search_keyword_in_element(child, keyword):
+            return True
+    return False
+
+def filter_xml_by_keyword(root, keyword):
+    """
+    Iterates through the XML tree and returns a list of elements
+    that contain the keyword in their text or nested children.
+    """
+    matching_elements = []
+    for elem in root.iter():
+        if search_keyword_in_element(elem, keyword):
+            matching_elements.append(elem)
+    return matching_elements
+
+def extract_tags_from_elements(elements, tag_names):
+    """
+    For each element in the provided list, search for specified tags (even if nested)
+    and return a list of the found tags.
+    """
+    extracted = []
+    for elem in elements:
+        for tag in tag_names:
+            # Using .// allows us to find the tag at any depth
+            found_tags = elem.findall('.//' + tag)
+            extracted.extend(found_tags)
+    return extracted
+
+def run_application():
+    # Step 1: Fetch the XML document from the API endpoint.
+    api_endpoint = "http://example.com/api/data.xml"  # Replace with your API endpoint
+    xml_data = fetch_xml(api_endpoint)
+    
+    if not xml_data:
+        print("Failed to retrieve XML data.")
+        return
+
+    try:
+        root = ET.fromstring(xml_data)
+    except ET.ParseError as e:
+        print("Error parsing XML:", e)
+        return
+
+    # Step 2: Search for a keyword (can be nested).
+    keyword = "search_keyword"  # Replace with your search term
+    matching_elements = filter_xml_by_keyword(root, keyword)
+    print(f"Found {len(matching_elements)} elements containing the keyword '{keyword}'.")
+
+    # Step 3 & 4: Extract specific tags from the filtered elements.
+    tags_to_extract = ["title", "link"]  # Specify which tags you want to extract
+    extracted_tags = extract_tags_from_elements(matching_elements, tags_to_extract)
+
+    # Step 5: Publish the list by printing out each extracted tag.
+    if extracted_tags:
+        print("\nExtracted tags:")
+        for tag in extracted_tags:
+            print(f"Tag: {tag.tag}, Text: {tag.text}")
+    else:
+        print("No tags extracted.")
